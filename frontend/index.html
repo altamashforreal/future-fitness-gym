@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymFlow - Admin Dashboard</title>
+    <meta name="description" content="GymFlow Admin Dashboard for managing members, plans, and check-ins.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-img-wrap">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfNBEf_r59KLV_4Bl4aSfUhSZ9sYPHQ5CVrIpCpUHf4g&s" alt="Future Fitness Logo" class="logo-img">
+                </div>
+                <div class="logo-text">
+                    <span class="logo-name">Future</span>
+                    <span class="logo-name accent">Fitness</span>
+                    <span class="logo-sub">GYM &bull; EST. 2024</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" id="nav-dashboard" data-page="dashboard">
+                    <ion-icon name="grid-outline"></ion-icon>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-members" data-page="members">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span>Members</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-checkin" data-page="checkin">
+                    <ion-icon name="finger-print-outline"></ion-icon>
+                    <span>Check-in</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-plans" data-page="plans">
+                    <ion-icon name="card-outline"></ion-icon>
+                    <span>Plans</span>
+                </a>
+            </nav>
+
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=F97316&color=fff" alt="User Avatar">
+                <div class="user-info">
+                    <h4>Admin Desk</h4>
+                    <p>Future Fitness Gym</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-bar">
+                    <ion-icon name="search-outline"></ion-icon>
+                    <input type="text" placeholder="Search members by name or phone..." id="global-search">
+                </div>
+                <div class="top-actions">
+                    <button class="btn btn-primary" id="open-add-member-btn">
+                        <ion-icon name="person-add-outline"></ion-icon> Add Member
+                    </button>
+                    <div class="api-status" id="api-status" title="Backend connection status">
+                        <span class="status-dot connecting"></span>
+                        <span class="status-text">Connecting...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ── DASHBOARD PAGE ── -->
+            <div class="page active" id="page-dashboard">
+                <div class="dashboard-content">
+                    <div class="welcome-banner">
+                        <div class="banner-text">
+                            <h1>Welcome back, Admin! 💪</h1>
+                            <p>Here's what's happening at <strong>Future Fitness Gym</strong> today.</p>
+                        </div>
+                        <div class="banner-img-wrap">
+                            <img src="images/banner.jpg" alt="Gym" class="banner-photo">
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon pulse-blue"><ion-icon name="people"></ion-icon></div>
+                            <div class="stat-details">
+                                <h3>Total Members</h3>
+                                <h2 id="stat-total-members">—</h2>
+                                <p class="trend up"><ion-icon name="trending-up-outline"></ion-icon> All registered</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon pulse-green"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
+                            <div class="stat-details">
+                                <h3>Active Memberships</h3>
+                                <h2 id="stat-active-members">—</h2>
+                                <p class="trend up"><ion-icon name="shield-checkmark-outline"></ion-icon> Valid plans</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24"><ion-icon name="time-outline"></ion-icon></div>
+                            <div class="stat-details">
+                                <h3>Expiring Soon</h3>
+                                <h2 id="stat-expiring-members" style="color:#f59e0b;">—</h2>
+                                <p class="trend" style="color:#f59e0b;"><ion-icon name="alert-outline"></ion-icon> Within 7 days</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#f87171"><ion-icon name="close-circle-outline"></ion-icon></div>
+                            <div class="stat-details">
+                                <h3>Expired Memberships</h3>
+                                <h2 id="stat-expired-members" style="color:#ef4444;">—</h2>
+                                <p class="trend down"><ion-icon name="trending-down-outline"></ion-icon> Need renewal</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon pulse-purple"><ion-icon name="list-outline"></ion-icon></div>
+                            <div class="stat-details">
+                                <h3>Plans Available</h3>
+                                <h2 id="stat-total-plans">—</h2>
+                                <p class="trend down">Base + Addon plans</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon pulse-blue" style="background:rgba(16,185,129,0.15);color:#34d399"><ion-icon name="server-outline"></ion-icon></div>
+                            <div class="stat-details">
+                                <h3>API Status</h3>
+                                <h2 id="stat-api-status">—</h2>
+                                <p class="trend up" id="stat-api-sub">FastAPI backend</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Members + Membership Status -->
+                    <div class="recent-activity-section">
+                        <div class="section-header">
+                            <h2>Recently Added Members</h2>
+                            <a href="#" class="view-all" id="view-all-members-link">View All →</a>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Member ID</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Plan</th>
+                                        <th>Membership Status</th>
+                                        <th>Expires On</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-members-tbody">
+                                    <tr><td colspan="7" class="loading-row"><span class="spinner"></span> Loading members...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Expiring / Expired Alert Section -->
+                    <div class="recent-activity-section" id="alert-section">
+                        <div class="section-header">
+                            <h2>⚠️ Requires Attention — Expiring &amp; Expired</h2>
+                            <span id="alert-count-badge" class="count-badge">0 members</span>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Member ID</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Plan</th>
+                                        <th>Expiry Date</th>
+                                        <th>Days</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alert-members-tbody">
+                                    <tr><td colspan="8" class="loading-row"><span class="spinner"></span> Checking...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Plans Overview -->
+                    <div class="recent-activity-section">
+                        <div class="section-header">
+                            <h2>Available Plans</h2>
+                            <a href="#" class="view-all" id="view-all-plans-link">View All →</a>
+                        </div>
+                        <div id="plans-grid-dashboard" class="plans-grid">
+                            <div class="loading-row"><span class="spinner"></span> Loading plans...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── MEMBERS PAGE ── -->
+            <div class="page" id="page-members">
+                <div class="dashboard-content">
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h1 style="font-size:1.6rem; font-weight:700;">All Members</h1>
+                        <button class="btn btn-primary" id="open-add-member-btn-2">
+                            <ion-icon name="person-add-outline"></ion-icon> Add Member
+                        </button>
+                    </div>
+
+                    <div class="recent-activity-section">
+                        <div class="section-header">
+                            <div class="search-bar" style="width:300px; padding: 8px 16px;">
+                                <ion-icon name="search-outline"></ion-icon>
+                                <input type="text" placeholder="Search members..." id="member-search-input">
+                            </div>
+                            <span id="members-count-badge" class="count-badge">0 members</span>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Member ID</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Gender</th>
+                                        <th>Plan</th>
+                                        <th>Membership Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="members-tbody">
+                                    <tr><td colspan="8" class="loading-row"><span class="spinner"></span> Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── PLANS PAGE ── -->
+            <div class="page" id="page-plans">
+                <div class="dashboard-content">
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h1 style="font-size:1.6rem; font-weight:700;">Membership Plans</h1>
+                    </div>
+                    <div id="plans-grid-full" class="plans-grid-large">
+                        <div class="loading-row"><span class="spinner"></span> Loading plans...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+            <!-- ── CHECK-IN PAGE ── -->
+            <div class="page" id="page-checkin" style="display:none;">
+                <div class="dashboard-content">
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h1 style="font-size:1.6rem; font-weight:700;">Check-in Terminal</h1>
+                        <span class="count-badge" id="checkin-today-count">— check-ins today</span>
+                    </div>
+
+                    <div class="checkin-layout">
+                        <!-- Left: Input Panel -->
+                        <div class="checkin-input-panel">
+                            <div class="checkin-card">
+                                <div class="checkin-card-header">
+                                    <ion-icon name="person-circle-outline"></ion-icon>
+                                    <h3>Manual / Staff Check-in</h3>
+                                </div>
+                                <p class="checkin-desc">Enter member ID or phone number to verify access.</p>
+                                <div class="checkin-input-wrap">
+                                    <input type="text" id="checkin-query" class="checkin-input" placeholder="GF0001 or 9876543210" autocomplete="off">
+                                    <button class="btn btn-primary" id="checkin-submit-btn">
+                                        <ion-icon name="checkmark-circle-outline"></ion-icon> Verify
+                                    </button>
+                                </div>
+                                <div class="checkin-method-row">
+                                    <label class="method-chip">
+                                        <input type="radio" name="checkin_method" value="member_id" checked> Member ID
+                                    </label>
+                                    <label class="method-chip">
+                                        <input type="radio" name="checkin_method" value="phone"> Phone
+                                    </label>
+                                    <label class="method-chip">
+                                        <input type="radio" name="checkin_method" value="qr_code"> QR Code
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Biometric Simulator -->
+                            <div class="checkin-card biometric-card">
+                                <div class="checkin-card-header">
+                                    <ion-icon name="finger-print-outline"></ion-icon>
+                                    <h3>Biometric Device Simulator</h3>
+                                </div>
+                                <p class="checkin-desc">Simulates a fingerprint scanner calling <code>POST /api/checkins/biometric/verify</code>. In production this is called automatically by the physical device.</p>
+                                <div class="checkin-input-wrap">
+                                    <input type="text" id="biometric-query" class="checkin-input" placeholder="Enter enrolled member_id (e.g. GF0001)">
+                                    <button class="btn btn-biometric" id="biometric-submit-btn">
+                                        <ion-icon name="finger-print-outline"></ion-icon> Scan
+                                    </button>
+                                </div>
+                                <div class="biometric-info">
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                    Webhook URL for your device: <code>POST http://&lt;your-ip&gt;:8000/api/checkins/biometric/verify</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Result + Live Log -->
+                        <div class="checkin-right-panel">
+                            <!-- Result Card -->
+                            <div id="checkin-result-card" class="checkin-result-card hidden">
+                                <div class="result-status-icon" id="result-icon"></div>
+                                <div class="result-details">
+                                    <div class="result-name" id="result-name"></div>
+                                    <div class="result-member-id" id="result-member-id"></div>
+                                    <div class="result-plan" id="result-plan"></div>
+                                    <div class="result-message" id="result-message"></div>
+                                </div>
+                            </div>
+
+                            <!-- Today's Log -->
+                            <div class="recent-activity-section" style="margin-top:0;">
+                                <div class="section-header">
+                                    <h2>Today's Log</h2>
+                                    <button class="btn btn-ghost" style="padding:6px 14px; font-size:0.85rem;" id="refresh-log-btn">
+                                        <ion-icon name="refresh-outline"></ion-icon> Refresh
+                                    </button>
+                                </div>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Member</th>
+                                                <th>Method</th>
+                                                <th>Time</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="checkin-log-tbody">
+                                            <tr><td colspan="4" class="loading-row"><span class="spinner"></span> Loading log...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ── MEMBER MODAL (Add/Edit) ── -->
+    <div class="modal-overlay" id="member-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h2 id="member-modal-title">Add New Member</h2>
+                    <p id="member-modal-desc">Fill in the details to register a new gym member.</p>
+                </div>
+                <button class="modal-close" id="close-modal-btn"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+
+            <form id="member-form" novalidate>
+                <input type="hidden" id="edit_member_id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="first_name">First Name <span class="required">*</span></label>
+                        <input type="text" id="first_name" name="first_name" placeholder="e.g. John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name <span class="required">*</span></label>
+                        <input type="text" id="last_name" name="last_name" placeholder="e.g. Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="e.g. john@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="">— Select —</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group form-full">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" name="address" placeholder="e.g. 123 Main St, City">
+                    </div>
+                    <div class="form-group">
+                        <label for="emergency_contact">Emergency Contact</label>
+                        <input type="tel" id="emergency_contact" name="emergency_contact" placeholder="e.g. 9876500000">
+                    </div>
+                </div>
+
+                <div id="form-error" class="form-error" style="display:none;"></div>
+                <div id="form-success" class="form-success" style="display:none;"></div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="cancel-modal-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submit-member-btn">
+                        <ion-icon name="save-outline"></ion-icon>
+                        <span id="submit-member-text">Save Member</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── DELETE CONFIRM MODAL ── -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <div>
+                    <h2>Delete Member</h2>
+                    <p>This action cannot be undone.</p>
+                </div>
+                <button class="modal-close" id="close-delete-modal"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+            <p style="margin: 1rem 0; color: var(--text-muted);">Are you sure you want to delete <strong id="delete-member-name"></strong>?</p>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="cancel-delete-btn">Cancel</button>
+                <button class="btn btn-danger" id="confirm-delete-btn">
+                    <ion-icon name="trash-outline"></ion-icon> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RENEW MEMBERSHIP MODAL ── -->
+    <div class="modal-overlay" id="renew-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h2>Renew Membership</h2>
+                    <p>Assign a new plan to <strong id="renew-member-name"></strong>.</p>
+                </div>
+                <button class="modal-close" id="close-renew-modal"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+
+            <form id="renew-form" novalidate>
+                <input type="hidden" id="renew-member-id">
+                <div class="form-grid">
+                    <div class="form-group form-full">
+                        <label for="renew_plan_id">Select Plan <span class="required">*</span></label>
+                        <select id="renew_plan_id" name="plan_id" required>
+                            <!-- populated via JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="renew_start_date">Start Date</label>
+                        <input type="date" id="renew_start_date" name="start_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method</label>
+                        <select id="payment_method" name="payment_method" required>
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="upi">UPI / Online</option>
+                        </select>
+                    </div>
+                    <div class="form-group form-full">
+                        <label for="transaction_id">Transaction ID (Optional)</label>
+                        <input type="text" id="transaction_id" name="transaction_id" placeholder="e.g. TXN12345678">
+                    </div>
+                </div>
+
+                <div id="renew-form-error" class="form-error" style="display:none;"></div>
+                <div id="renew-form-success" class="form-success" style="display:none;"></div>
+
+                <div class="modal-footer" style="justify-content: space-between;">
+                    <button type="button" class="btn btn-ghost" id="cancel-renew-btn">Cancel</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn" style="background:#25D366; color:white; border:none;" id="send-wa-link-btn">
+                            <ion-icon name="logo-whatsapp"></ion-icon>
+                            <span>Send Payment Link</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submit-renew-btn">
+                            <ion-icon name="card-outline"></ion-icon>
+                            <span>Cash / Direct Renew</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Payment - GymFlow</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6; --primary-hover: #2563eb; --bg-dark: #09090b;
+            --bg-card: #18181b; --text-main: #f8fafc; --text-muted: #94a3b8;
+            --border-color: #27272a; --success: #10b981;
+        }
+        body {
+            margin: 0; padding: 0; font-family: 'Inter', sans-serif;
+            background: var(--bg-dark); color: var(--text-main);
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+        }
+        .checkout-container {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 480px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden;
+        }
+        .checkout-container::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+        }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header p { color: var(--text-muted); font-size: 0.95rem; }
+        .summary-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
+        .summary-row.total { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem; font-weight: 700; font-size: 1.2rem; color: var(--primary); margin-bottom: 0; }
+        
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .form-control {
+            width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 12px 16px; color: var(--text-main); font-size: 1rem;
+            outline: none; transition: 0.2s;
+        }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        
+        .pay-btn {
+            width: 100%; background: linear-gradient(135deg, var(--primary), #2563eb);
+            color: white; border: none; padding: 14px; border-radius: 12px;
+            font-size: 1.05rem; font-weight: 600; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
+        }
+        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
+        .pay-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .success-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-card); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10;
+        }
+        .success-overlay.active { opacity: 1; pointer-events: auto; }
+        .success-icon { font-size: 4rem; color: var(--success); margin-bottom: 1rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        
+        .error-msg { color: #ef4444; font-size: 0.9rem; margin-top: 1rem; text-align: center; display: none; }
+        
+        .loader { display: none; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="checkout-container">
+        <!-- Main Form -->
+        <div id="checkout-form-view">
+            <div class="header">
+                <h1>Future Fitness Gym</h1>
+                <p>Complete your membership renewal</p>
+            </div>
+            
+            <div class="summary-card" id="loading-summary">
+                <p style="text-align:center; color: var(--text-muted);">Loading payment details...</p>
+            </div>
+            
+            <div class="summary-card" id="summary-details" style="display:none;">
+                <div class="summary-row"><span>Member:</span> <strong id="sum-name">...</strong></div>
+                <div class="summary-row"><span>Plan:</span> <strong id="sum-plan">...</strong></div>
+                <div class="summary-row"><span>Duration:</span> <strong id="sum-duration">...</strong></div>
+                <div class="summary-row total"><span>Total to Pay:</span> <span id="sum-price">₹0</span></div>
+            </div>
+            
+            <form id="payment-form">
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                </div>
+                <div style="display:flex; gap: 1rem;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Expiry (MM/YY)</label>
+                        <input type="text" class="form-control" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>CVV</label>
+                        <input type="password" class="form-control" placeholder="•••" maxlength="4" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="pay-btn" id="pay-btn">
+                    <span id="btn-text">Pay Now</span>
+                    <div class="loader" id="btn-loader"></div>
+                </button>
+                <div class="error-msg" id="error-msg"></div>
+            </form>
+        </div>
+        
+        <!-- Success Screen -->
+        <div class="success-overlay" id="success-screen">
+            <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
+            <h2 style="margin-bottom:0.5rem;">Payment Successful!</h2>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom: 2rem;">Your membership has been renewed.</p>
+            <button class="pay-btn" style="background:#27272a; width:auto; padding:10px 24px;" onclick="window.close()">Close Window</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const urlParams = new URLSearchParams(window.location.search);
+        const memberId = urlParams.get('member_id');
+        const planId = urlParams.get('plan_id');
+        
+        let loadedPlan = null;
+        
+        async function loadDetails() {
+            if (!memberId || !planId) {
+                showError("Invalid payment link.");
+                return;
+            }
+            
+            try {
+                // Fetch member details
+                const mRes = await fetch(`${API_BASE}/members/${memberId}`);
+                if (!mRes.ok) throw new Error("Member not found");
+                const member = await mRes.json();
+                
+                // Fetch plans to find price
+                const pRes = await fetch(`${API_BASE}/plans/`);
+                if (!pRes.ok) throw new Error("Could not load plans");
+                const plans = await pRes.json();
+                loadedPlan = plans.find(p => p.id == planId);
+                
+                if (!loadedPlan) throw new Error("Plan not found");
+                
+                // Update UI
+                document.getElementById('loading-summary').style.display = 'none';
+                document.getElementById('summary-details').style.display = 'block';
+                
+                document.getElementById('sum-name').textContent = `${member.first_name} ${member.last_name}`;
+                document.getElementById('sum-plan').textContent = loadedPlan.name;
+                document.getElementById('sum-duration').textContent = `${loadedPlan.duration_days} days`;
+                document.getElementById('sum-price').textContent = `₹${loadedPlan.price.toLocaleString('en-IN')}`;
+                
+            } catch (err) {
+                document.getElementById('loading-summary').innerHTML = `<p style="color:#ef4444;text-align:center;">Error: ${err.message}</p>`;
+            }
+        }
+        
+        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!loadedPlan) return;
+            
+            const btn = document.getElementById('pay-btn');
+            const text = document.getElementById('btn-text');
+            const loader = document.getElementById('btn-loader');
+            const errorEl = document.getElementById('error-msg');
+            
+            btn.disabled = true;
+            text.style.display = 'none';
+            loader.style.display = 'block';
+            errorEl.style.display = 'none';
+            
+            // SIMULATE PAYMENT DELAY (Mock Payment Gateway)
+            await new Promise(r => setTimeout(r, 1500));
+            
+            // Actually call the backend to renew membership via API
+            try {
+                const payload = {
+                    member_id: parseInt(memberId),
+                    plan_id: parseInt(planId),
+                    start_date: null, // today
+                    payment_method: "card", // online payment
+                    transaction_id: "TXN_" + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                    is_renewal: true,
+                    addon_ids: []
+                };
+                
+                const res = await fetch(`${API_BASE}/memberships/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.detail || "Payment failed to record on server");
+                }
+                
+                // Show Success Screen
+                document.getElementById('success-screen').classList.add('active');
+                
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                text.style.display = 'block';
+                loader.style.display = 'none';
+            }
+        });
+        
+        loadDetails();
+    </script>
+</body>
+</html>
