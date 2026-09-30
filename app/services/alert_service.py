@@ -152,16 +152,9 @@ def send_payment_receipt(member, amount: float, plan_name: str, method: str, sta
     if member.phone and twilio_client and TWILIO_WHATSAPP_NUMBER:
         try:
             phone_formatted = member.phone if member.phone.startswith('+') else f"+91{member.phone}"
-            import json
-            # We'll use the hello_world template for Sandbox to avoid ContentSid errors
-            # Template: "Your {{1}} code is {{2}}"
             message = twilio_client.messages.create(
                 from_=TWILIO_WHATSAPP_NUMBER,
-                content_sid="HXb5b62575e6e4ff6129ad7c8efe1f983e",  
-                content_variables=json.dumps({
-                    "1": f"{member.first_name}'s Future Fitness Gym receipt",
-                    "2": f"\nAmt: Rs{amount}\nPlan: {plan_name}\nTo: {end_date}"
-                }),
+                body=msg_body,
                 to=f"whatsapp:{phone_formatted}"
             )
             logger.info(f"✅ Receipt WhatsApp sent to {phone_formatted} (SID: {message.sid})")
