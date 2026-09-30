@@ -144,16 +144,20 @@ def send_payment_link(member_id: int, body: dict, db: Session = Depends(get_db))
 
     from app.services.alert_service import twilio_client, TWILIO_WHATSAPP_NUMBER
 
-    # Twilio Sandbox strictly requires matching a pre-approved template for outbound messages.
-    # The default sandbox template is: "Your {{1}} code is {{2}}"
-    msg = f"Your Future Fitness Payment code is {pay_url}"
-
     if twilio_client and TWILIO_WHATSAPP_NUMBER:
         try:
             phone = member.phone if member.phone.startswith('+') else f"+91{member.phone}"
+            # Use Twilio's approved sandbox content template (HX...) for session-less messages.
+            # Template: "Your {{1}} code is {{2}}"
+            # We embed the payment link in variable 1, and gym name in variable 2.
+            import json
             message = twilio_client.messages.create(
                 from_=TWILIO_WHATSAPP_NUMBER,
-                body=msg,
+                content_sid="HXb5b62575e6e4ff6129ad7c8efe1f983e",  # Twilio sandbox "hello world" template
+                content_variables=json.dumps({
+                    "1": f"{member.first_name}'s Future Fitness Gym renewal",
+                    "2": pay_url
+                }),
                 to=f"whatsapp:{phone}"
             )
             return {"status": "sent", "to": phone, "sid": message.sid}

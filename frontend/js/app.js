@@ -551,7 +551,7 @@ function setupRenewModal() {
     document.getElementById('cancel-renew-btn')?.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-    // WhatsApp Link Generation — sends directly via Twilio (no WhatsApp Web)
+    // WhatsApp Link Generation — tries Twilio first, falls back to WhatsApp Web
     document.getElementById('send-wa-link-btn')?.addEventListener('click', async () => {
         const planId = document.getElementById('renew_plan_id').value;
         if (!planId) {
@@ -582,7 +582,12 @@ function setupRenewModal() {
 
             showRenewSuccess("✅ Payment link sent to " + currentRenewMember.first_name + "'s WhatsApp!");
         } catch (err) {
-            showRenewError("❌ Could not send WhatsApp: " + err.message);
+            // Twilio trial limitation — fall back to WhatsApp Web with pre-filled message
+            let phone = currentRenewMember.phone;
+            if (!phone.startsWith('91') && !phone.startsWith('+91')) phone = '91' + phone;
+            const msg = `Hi ${currentRenewMember.first_name}, your Future Fitness Gym membership is expiring soon.\n\nClick to renew instantly: ${payUrl}\n\nThank you! 💪`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            showRenewSuccess("✅ WhatsApp opened with payment link for " + currentRenewMember.first_name + "!");
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalText;
