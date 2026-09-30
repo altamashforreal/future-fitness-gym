@@ -195,6 +195,9 @@
                 <button class="print-btn secondary" onclick="window.print()">🖨️ Print</button>
                 <button class="print-btn primary" onclick="window.print()">⬇️ Save PDF</button>
             </div>
+            <div style="text-align:center; margin-top:1rem; color:#9ca3af; font-size:0.82rem;">
+                Redirecting back to app in <span id="countdown">5</span>s…
+            </div>
         </div>
     </div>
 
@@ -338,6 +341,18 @@
             document.getElementById('r-from').textContent = data.start_date || fmt(today);
             document.getElementById('r-to').textContent   = data.end_date   || '—';
             document.getElementById('r-txn').textContent  = paymentId;
+
+            // Auto-redirect back to the app after 5 seconds
+            let secs = 5;
+            const countEl = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                secs--;
+                if (countEl) countEl.textContent = secs;
+                if (secs <= 0) {
+                    clearInterval(timer);
+                    window.location.href = '/frontend/index.html';
+                }
+            }, 1000);
         }
 
         function showError(msg) {
