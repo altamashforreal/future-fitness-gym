@@ -130,6 +130,25 @@ def verify_razorpay_payment(body: dict, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(membership)
 
+    member = db.query(Member).filter(Member.id == member_id).first()
+    if member:
+        # Send WhatsApp & Email Receipt in background
+        from app.services.alert_service import send_payment_receipt
+        try:
+            send_payment_receipt(
+                member=member,
+                amount=plan.price,
+                plan_name=plan.name,
+                method="razorpay",
+                start_date=start,
+                end_date=end,
+                tx_id=payment_id
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to send Razorpay receipt: {e}")
+
+
     return {
         "status": "success",
         "membership_id": membership.id,

@@ -62,4 +62,21 @@ def create_or_renew_membership(data: MembershipCreate, db: Session = Depends(get
     
     db.commit()
     db.refresh(membership)
+
+    # Send WhatsApp & Email Receipt in background
+    from app.services.alert_service import send_payment_receipt
+    try:
+        send_payment_receipt(
+            member=member,
+            amount=total_amount,
+            plan_name=plan.name,
+            method=data.payment_method,
+            start_date=start,
+            end_date=end,
+            tx_id=data.transaction_id
+        )
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to send receipt: {e}")
+
     return membership

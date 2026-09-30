@@ -109,3 +109,61 @@ def send_expiry_alert_if_needed(member, expired: bool):
                 logger.error(f"❌ Failed to send Alert WhatsApp to {member.phone}: {e}")
         else:
             logger.info(f"[MOCK ALERT WHATSAPP to {member.phone}]: {msg}")
+
+
+def send_payment_receipt(member, amount: float, plan_name: str, method: str, start_date, end_date, tx_id: str = None):
+    """
+    Send payment receipt via WhatsApp and Email.
+    """
+    subject = "Future Fitness Gym - Payment Receipt"
+    
+    msg_body = (
+        f"Hi {member.first_name},\n\n"
+        f"Thank you for your payment! Here is your receipt:\n\n"
+        f"Amount: Rs {amount}\n"
+        f"Plan: {plan_name}\n"
+        f"Valid from: {start_date} to {end_date}\n"
+        f"Method: {method.upper()}\n"
+    )
+    if tx_id:
+        msg_body += f"Txn ID: {tx_id}\n"
+        
+    msg_body += "\nThank you for choosing Future Fitness Gym! 💪"
+
+    # 1. Email
+    if member.email and SMTP_USER and SMTP_PASSWORD:
+        try:
+            msg = EmailMessage()
+            msg.set_content(msg_body)
+            msg['Subject'] = subject
+            msg['From'] = f"Future Fitness <{SMTP_USER}>"
+            msg['To'] = member.email
+
+            server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+            server.quit()
+            logger.info(f"✅ Receipt Email sent to {member.email}")
+        except Exception as e:
+            logger.error(f"❌ Failed to send receipt email to {member.email}: {e}")
+
+    # 2. WhatsApp
+    if member.phone and twilio_client and TWILIO_WHATSAPP_NUMBER:
+        try:
+            phone_formatted = member.phone if member.phone.startswith('+') else f"+91{member.phone}"
+            import json
+            # We'll use the hello_world template for Sandbox to avoid ContentSid errors
+            # Template: "Your {{1}} code is {{2}}"
+            message = twilio_client.messages.create(
+                from_=TWILIO_WHATSAPP_NUMBER,
+                content_sid="HXb5b62575e6e4ff6129ad7c8efe1f983e",  
+                content_variables=json.dumps({
+                    "1": f"{member.first_name}'s Future Fitness Gym receipt",
+                    "2": f"\nAmt: Rs{amount}\nPlan: {plan_name}\nTo: {end_date}"
+                }),
+                to=f"whatsapp:{phone_formatted}"
+            )
+            logger.info(f"✅ Receipt WhatsApp sent to {phone_formatted} (SID: {message.sid})")
+        except Exception as e:
+            logger.error(f"❌ Failed to send receipt WhatsApp to {member.phone}: {e}")
