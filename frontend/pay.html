@@ -3,225 +3,446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Your Payment - GymFlow</title>
+    <title>Complete Your Payment - Future Fitness Gym</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #3b82f6; --primary-hover: #2563eb; --bg-dark: #09090b;
-            --bg-card: #18181b; --text-main: #f8fafc; --text-muted: #94a3b8;
-            --border-color: #27272a; --success: #10b981;
+            --primary: #e8590c; --primary-hover: #d44d08;
+            --bg: #f8f5f0; --bg-card: #fff;
+            --text-main: #1a1a1a; --text-muted: #6b7280;
+            --border: #e5e7eb; --success: #10b981;
+            --accent: #f97316;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0; padding: 0; font-family: 'Inter', sans-serif;
-            background: var(--bg-dark); color: var(--text-main);
-            display: flex; align-items: center; justify-content: center;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text-main);
+            min-height: 100vh; display: flex; align-items: center;
+            justify-content: center; padding: 1.5rem;
         }
         .checkout-container {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 480px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: var(--bg-card); border-radius: 20px;
+            width: 100%; max-width: 480px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.12);
             position: relative; overflow: hidden;
         }
-        .checkout-container::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+        .top-bar {
+            background: linear-gradient(135deg, #e8590c, #f97316);
+            padding: 1.8rem 2rem; text-align: center; color: white;
         }
-        .header { text-align: center; margin-bottom: 2rem; }
-        .header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .header p { color: var(--text-muted); font-size: 0.95rem; }
+        .top-bar h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.3px; }
+        .top-bar p { font-size: 0.9rem; opacity: 0.85; margin-top: 0.3rem; }
+        .content { padding: 2rem; }
+
+        /* Summary */
         .summary-card {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;
+            background: #fff8f5; border: 1px solid #ffe4d6;
+            border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;
         }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
-        .summary-row.total { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem; font-weight: 700; font-size: 1.2rem; color: var(--primary); margin-bottom: 0; }
-        
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.92rem; color: var(--text-muted); }
+        .summary-row strong { color: var(--text-main); }
+        .summary-row.total { border-top: 1px solid #ffe4d6; padding-top: 0.8rem; font-weight: 700; font-size: 1.2rem; color: var(--primary); margin-bottom: 0; }
+
+        /* Payment Method Tabs */
+        .method-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem; }
+        .method-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .method-tab {
+            border: 2px solid var(--border); border-radius: 12px;
+            padding: 1rem; text-align: center; cursor: pointer;
+            transition: all 0.2s; background: #fff;
+        }
+        .method-tab:hover { border-color: var(--accent); }
+        .method-tab.active { border-color: var(--primary); background: #fff8f5; }
+        .method-tab .tab-icon { font-size: 1.8rem; margin-bottom: 0.4rem; display: block; }
+        .method-tab .tab-label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+        .method-tab .tab-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+        /* UPI Section */
+        #upi-section { display: none; }
+        .upi-box {
+            border: 2px dashed #e8590c; border-radius: 16px;
+            padding: 1.5rem; text-align: center; background: #fff8f5;
+            margin-bottom: 1.5rem;
+        }
+        .upi-box img { width: 200px; height: 200px; border-radius: 8px; margin-bottom: 0.75rem; display: block; margin-left: auto; margin-right: auto; }
+        .upi-box .upi-id { font-size: 0.85rem; font-weight: 600; color: var(--primary); margin-bottom: 0.4rem; }
+        .upi-box .upi-note { font-size: 0.78rem; color: var(--text-muted); }
+        .upi-amount-badge {
+            display: inline-block; background: var(--primary); color: white;
+            font-size: 1.1rem; font-weight: 700; padding: 6px 20px;
+            border-radius: 50px; margin-bottom: 0.75rem;
+        }
+        .upi-confirm-btn {
+            width: 100%; background: #10b981; color: white; border: none;
+            padding: 13px; border-radius: 12px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: 0.2s; margin-top: 0.5rem;
+        }
+        .upi-confirm-btn:hover { background: #059669; transform: translateY(-1px); }
+
+        /* Card Section */
+        #card-section { display: none; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .form-control {
-            width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2);
-            border: 1px solid var(--border-color); border-radius: 10px;
-            padding: 12px 16px; color: var(--text-main); font-size: 1rem;
-            outline: none; transition: 0.2s;
+            width: 100%; background: #f9fafb;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            padding: 12px 14px; color: var(--text-main); font-size: 1rem;
+            outline: none; transition: 0.2s; font-family: 'Inter', sans-serif;
         }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-        
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(232,89,12,0.1); background: white; }
         .pay-btn {
-            width: 100%; background: linear-gradient(135deg, var(--primary), #2563eb);
+            width: 100%; background: linear-gradient(135deg, var(--primary), #f97316);
             color: white; border: none; padding: 14px; border-radius: 12px;
-            font-size: 1.05rem; font-weight: 600; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(232,89,12,0.3);
         }
-        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
-        .pay-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
-        
-        .success-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-card); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center;
-            opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10;
-        }
-        .success-overlay.active { opacity: 1; pointer-events: auto; }
-        .success-icon { font-size: 4rem; color: var(--success); margin-bottom: 1rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        
-        .error-msg { color: #ef4444; font-size: 0.9rem; margin-top: 1rem; text-align: center; display: none; }
-        
-        .loader { display: none; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(232,89,12,0.4); }
+        .pay-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .loader { display: none; border: 3px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .error-msg { color: #ef4444; font-size: 0.88rem; margin-top: 0.75rem; text-align: center; display: none; }
+
+        /* RECEIPT */
+        #receipt-view {
+            display: none; padding: 0;
+        }
+        .receipt-page {
+            background: #fff; padding: 2rem 2rem 1.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+        .receipt-header { text-align: center; border-bottom: 3px double #8B4513; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .receipt-header h2 { font-size: 1.4rem; font-weight: 800; color: #8B4513; letter-spacing: 1px; text-transform: uppercase; }
+        .receipt-header p { font-size: 0.78rem; color: #666; margin-top: 0.2rem; }
+        .receipt-meta { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+        .receipt-meta .field { font-size: 0.82rem; }
+        .receipt-meta .field label { color: #888; font-size: 0.72rem; text-transform: uppercase; display: block; }
+        .receipt-meta .field strong { color: #1a1a1a; font-size: 0.88rem; }
+        .receipt-body { border: 2px solid #8B4513; border-radius: 4px; padding: 1rem; margin-bottom: 1rem; }
+        .receipt-body p { font-size: 0.88rem; line-height: 1.8; color: #333; }
+        .receipt-body .amount-words { font-size: 1rem; font-weight: 600; color: #1a1a1a; }
+        .receipt-amount-box {
+            float: left; border: 2px solid #8B4513; padding: 8px 16px;
+            font-size: 1.5rem; font-weight: 800; color: #8B4513;
+            border-radius: 4px; margin-right: 1rem; margin-bottom: 0.5rem;
+        }
+        .receipt-footer { display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px double #8B4513; padding-top: 1rem; margin-top: 1rem; }
+        .receipt-footer .seal { font-size: 0.75rem; color: #888; text-align: center; }
+        .receipt-footer .seal .seal-box { border: 2px solid #ccc; border-radius: 50%; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.25rem; font-size: 0.6rem; text-align: center; color: #e8590c; font-weight: 700; }
+        .receipt-footer .sig { text-align: center; }
+        .receipt-footer .sig .sig-line { border-top: 1px solid #333; width: 100px; margin: 0 auto 0.25rem; }
+        .receipt-footer .sig p { font-size: 0.72rem; color: #888; }
+        .receipt-notice { font-size: 0.68rem; color: #999; text-align: center; margin-top: 0.75rem; border-top: 1px solid #eee; padding-top: 0.5rem; }
+        .print-actions { display: flex; gap: 0.75rem; padding: 1rem 2rem 1.5rem; background: #f9fafb; border-top: 1px solid var(--border); }
+        .print-btn {
+            flex: 1; padding: 11px; border-radius: 10px; font-size: 0.92rem;
+            font-weight: 600; cursor: pointer; border: none; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .print-btn.primary { background: var(--primary); color: white; }
+        .print-btn.primary:hover { background: var(--primary-hover); }
+        .print-btn.secondary { background: #e5e7eb; color: #374151; }
+        .print-btn.secondary:hover { background: #d1d5db; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .checkout-container { box-shadow: none; border-radius: 0; }
+            .print-actions { display: none; }
+            .top-bar { display: none; }
+        }
     </style>
 </head>
 <body>
-
     <div class="checkout-container">
-        <!-- Main Form -->
-        <div id="checkout-form-view">
-            <div class="header">
-                <h1>Future Fitness Gym</h1>
-                <p>Complete your membership renewal</p>
+        <!-- Payment Flow -->
+        <div id="payment-view">
+            <div class="top-bar">
+                <h1>💪 Future Fitness Gym</h1>
+                <p>Secure Membership Payment</p>
             </div>
-            
-            <div class="summary-card" id="loading-summary">
-                <p style="text-align:center; color: var(--text-muted);">Loading payment details...</p>
-            </div>
-            
-            <div class="summary-card" id="summary-details" style="display:none;">
-                <div class="summary-row"><span>Member:</span> <strong id="sum-name">...</strong></div>
-                <div class="summary-row"><span>Plan:</span> <strong id="sum-plan">...</strong></div>
-                <div class="summary-row"><span>Duration:</span> <strong id="sum-duration">...</strong></div>
-                <div class="summary-row total"><span>Total to Pay:</span> <span id="sum-price">₹0</span></div>
-            </div>
-            
-            <form id="payment-form">
-                <div class="form-group">
-                    <label>Card Number</label>
-                    <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" required>
+            <div class="content">
+                <!-- Loading -->
+                <div class="summary-card" id="loading-summary">
+                    <p style="text-align:center; color:#6b7280;">Loading payment details...</p>
                 </div>
-                <div style="display:flex; gap: 1rem;">
-                    <div class="form-group" style="flex:1;">
-                        <label>Expiry (MM/YY)</label>
-                        <input type="text" class="form-control" placeholder="MM/YY" maxlength="5" required>
+
+                <!-- Summary -->
+                <div class="summary-card" id="summary-details" style="display:none;">
+                    <div class="summary-row"><span>Member</span><strong id="sum-name">...</strong></div>
+                    <div class="summary-row"><span>Plan</span><strong id="sum-plan">...</strong></div>
+                    <div class="summary-row"><span>Duration</span><strong id="sum-duration">...</strong></div>
+                    <div class="summary-row total"><span>Total</span><span id="sum-price">₹0</span></div>
+                </div>
+
+                <!-- Method Selector -->
+                <div id="method-selector" style="display:none;">
+                    <div class="method-label">Select Payment Method</div>
+                    <div class="method-tabs">
+                        <div class="method-tab active" id="tab-upi" onclick="selectMethod('upi')">
+                            <span class="tab-icon">📱</span>
+                            <div class="tab-label">UPI / QR Code</div>
+                            <div class="tab-sub">Scan & Pay Instantly</div>
+                        </div>
+                        <div class="method-tab" id="tab-card" onclick="selectMethod('card')">
+                            <span class="tab-icon">💳</span>
+                            <div class="tab-label">Card</div>
+                            <div class="tab-sub">Debit / Credit</div>
+                        </div>
                     </div>
-                    <div class="form-group" style="flex:1;">
-                        <label>CVV</label>
-                        <input type="password" class="form-control" placeholder="•••" maxlength="4" required>
+
+                    <!-- UPI Section -->
+                    <div id="upi-section">
+                        <div class="upi-box">
+                            <div class="upi-amount-badge" id="upi-amount-badge">₹0</div>
+                            <img id="upi-qr" src="" alt="UPI QR Code">
+                            <div class="upi-id">asahibole10-3@okhdfcbank</div>
+                            <div class="upi-note">Scan with any UPI app · PhonePe · GPay · Paytm</div>
+                        </div>
+                        <button class="upi-confirm-btn" onclick="confirmUPI()">
+                            ✅ I have completed the payment
+                        </button>
+                    </div>
+
+                    <!-- Card Section -->
+                    <div id="card-section">
+                        <form id="card-form">
+                            <div class="form-group">
+                                <label>Card Number</label>
+                                <input type="text" class="form-control" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19">
+                            </div>
+                            <div style="display:flex; gap: 0.75rem;">
+                                <div class="form-group" style="flex:1;">
+                                    <label>Expiry (MM/YY)</label>
+                                    <input type="text" class="form-control" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>CVV</label>
+                                    <input type="password" class="form-control" placeholder="•••" maxlength="4">
+                                </div>
+                            </div>
+                            <button type="submit" class="pay-btn" id="pay-btn">
+                                <span id="btn-text">Pay Now</span>
+                                <div class="loader" id="btn-loader"></div>
+                            </button>
+                            <div class="error-msg" id="error-msg"></div>
+                        </form>
                     </div>
                 </div>
-                
-                <button type="submit" class="pay-btn" id="pay-btn">
-                    <span id="btn-text">Pay Now</span>
-                    <div class="loader" id="btn-loader"></div>
-                </button>
-                <div class="error-msg" id="error-msg"></div>
-            </form>
+            </div>
         </div>
-        
-        <!-- Success Screen -->
-        <div class="success-overlay" id="success-screen">
-            <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-            <h2 style="margin-bottom:0.5rem;">Payment Successful!</h2>
-            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom: 2rem;">Your membership has been renewed.</p>
-            <button class="pay-btn" style="background:#27272a; width:auto; padding:10px 24px;" onclick="window.close()">Close Window</button>
+
+        <!-- Receipt View -->
+        <div id="receipt-view">
+            <div class="receipt-page" id="receipt-print-area">
+                <div class="receipt-header">
+                    <h2>Future Fitness Gym</h2>
+                    <p>Membership Fee Receipt</p>
+                </div>
+
+                <div class="receipt-meta">
+                    <div class="field">
+                        <label>Receipt No.</label>
+                        <strong id="r-no">—</strong>
+                    </div>
+                    <div class="field" style="text-align:right;">
+                        <label>Date</label>
+                        <strong id="r-date">—</strong>
+                    </div>
+                </div>
+
+                <div class="receipt-body">
+                    <div style="overflow:hidden;">
+                        <div class="receipt-amount-box" id="r-amount">₹0</div>
+                        <p>
+                            RECEIVED with thanks from<br>
+                            <strong id="r-name" style="font-size:1rem;"></strong><br><br>
+                            the sum of Rupees <span class="amount-words" id="r-words"></span><br><br>
+                            by <strong id="r-method">—</strong>, on account of 
+                            <strong id="r-plan">—</strong> membership plan<br>
+                            valid from <strong id="r-from">—</strong> to <strong id="r-to">—</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="receipt-footer">
+                    <div class="seal">
+                        <div class="seal-box">FUTURE<br>FITNESS<br>GYM</div>
+                        <small>Official Seal</small>
+                    </div>
+                    <div class="sig">
+                        <div class="sig-line"></div>
+                        <p>Authorized Signature</p>
+                    </div>
+                </div>
+
+                <div class="receipt-notice">
+                    This receipt is valid subject to realization of payment. · No Refund · No Transfer · No Extension.
+                </div>
+            </div>
+
+            <div class="print-actions">
+                <button class="print-btn secondary" onclick="window.print()">
+                    🖨️ Print Receipt
+                </button>
+                <button class="print-btn primary" onclick="downloadReceipt()">
+                    ⬇️ Save as PDF
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
         const API_BASE = '/api';
+        const UPI_ID = 'asahibole10-3@okhdfcbank';
+        const GYM_NAME = 'Future Fitness Gym';
+
         const urlParams = new URLSearchParams(window.location.search);
         const memberId = urlParams.get('member_id');
         const planId = urlParams.get('plan_id');
-        
-        let loadedPlan = null;
-        
+
+        let loadedPlan = null, loadedMember = null;
+        let currentMethod = 'upi';
+
         async function loadDetails() {
-            if (!memberId || !planId) {
-                showError("Invalid payment link.");
-                return;
-            }
-            
+            if (!memberId || !planId) { showLoadError("Invalid payment link."); return; }
             try {
-                // Fetch member details
-                const mRes = await fetch(`${API_BASE}/members/${memberId}`);
+                const [mRes, pRes] = await Promise.all([
+                    fetch(`${API_BASE}/members/${memberId}`),
+                    fetch(`${API_BASE}/plans/`)
+                ]);
                 if (!mRes.ok) throw new Error("Member not found");
-                const member = await mRes.json();
-                
-                // Fetch plans to find price
-                const pRes = await fetch(`${API_BASE}/plans/`);
                 if (!pRes.ok) throw new Error("Could not load plans");
+
+                loadedMember = await mRes.json();
                 const plans = await pRes.json();
                 loadedPlan = plans.find(p => p.id == planId);
-                
                 if (!loadedPlan) throw new Error("Plan not found");
-                
-                // Update UI
+
+                const price = loadedPlan.price;
                 document.getElementById('loading-summary').style.display = 'none';
                 document.getElementById('summary-details').style.display = 'block';
-                
-                document.getElementById('sum-name').textContent = `${member.first_name} ${member.last_name}`;
+                document.getElementById('method-selector').style.display = 'block';
+
+                document.getElementById('sum-name').textContent = `${loadedMember.first_name} ${loadedMember.last_name}`;
                 document.getElementById('sum-plan').textContent = loadedPlan.name;
                 document.getElementById('sum-duration').textContent = `${loadedPlan.duration_days} days`;
-                document.getElementById('sum-price').textContent = `₹${loadedPlan.price.toLocaleString('en-IN')}`;
-                
-            } catch (err) {
-                document.getElementById('loading-summary').innerHTML = `<p style="color:#ef4444;text-align:center;">Error: ${err.message}</p>`;
+                document.getElementById('sum-price').textContent = `₹${price.toLocaleString('en-IN')}`;
+
+                // Generate UPI QR
+                generateUPIQR(price);
+                document.getElementById('upi-amount-badge').textContent = `₹${price.toLocaleString('en-IN')}`;
+
+                // Default to UPI shown
+                selectMethod('upi');
+            } catch(err) {
+                showLoadError(err.message);
             }
         }
-        
-        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+
+        function generateUPIQR(amount) {
+            const upiString = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(GYM_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Membership Renewal')}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
+            document.getElementById('upi-qr').src = qrUrl;
+        }
+
+        function selectMethod(method) {
+            currentMethod = method;
+            document.getElementById('tab-upi').classList.toggle('active', method === 'upi');
+            document.getElementById('tab-card').classList.toggle('active', method === 'card');
+            document.getElementById('upi-section').style.display = method === 'upi' ? 'block' : 'none';
+            document.getElementById('card-section').style.display = method === 'card' ? 'block' : 'none';
+        }
+
+        async function confirmUPI() {
+            await recordAndShowReceipt('UPI');
+        }
+
+        document.getElementById('card-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!loadedPlan) return;
-            
             const btn = document.getElementById('pay-btn');
             const text = document.getElementById('btn-text');
             const loader = document.getElementById('btn-loader');
-            const errorEl = document.getElementById('error-msg');
-            
-            btn.disabled = true;
-            text.style.display = 'none';
-            loader.style.display = 'block';
-            errorEl.style.display = 'none';
-            
-            // SIMULATE PAYMENT DELAY (Mock Payment Gateway)
+            btn.disabled = true; text.style.display = 'none'; loader.style.display = 'block';
             await new Promise(r => setTimeout(r, 1500));
-            
-            // Actually call the backend to renew membership via API
+            await recordAndShowReceipt('Card');
+            btn.disabled = false; text.style.display = 'block'; loader.style.display = 'none';
+        });
+
+        async function recordAndShowReceipt(method) {
             try {
+                const txnId = 'TXN_' + Math.random().toString(36).substr(2, 9).toUpperCase();
                 const payload = {
                     member_id: parseInt(memberId),
                     plan_id: parseInt(planId),
-                    start_date: null, // today
-                    payment_method: "card", // online payment
-                    transaction_id: "TXN_" + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                    start_date: null,
+                    payment_method: method.toLowerCase(),
+                    transaction_id: txnId,
                     is_renewal: true,
                     addon_ids: []
                 };
-                
                 const res = await fetch(`${API_BASE}/memberships/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
                 if (!res.ok) {
                     const data = await res.json();
-                    throw new Error(data.detail || "Payment failed to record on server");
+                    throw new Error(data.detail || "Could not record payment");
                 }
-                
-                // Show Success Screen
-                document.getElementById('success-screen').classList.add('active');
-                
-            } catch (err) {
-                errorEl.textContent = err.message;
-                errorEl.style.display = 'block';
-                btn.disabled = false;
-                text.style.display = 'block';
-                loader.style.display = 'none';
+                const membership = await res.json();
+                showReceipt(membership, method, txnId);
+            } catch(err) {
+                alert('Error: ' + err.message);
             }
-        });
-        
+        }
+
+        function showReceipt(membership, method, txnId) {
+            document.getElementById('payment-view').style.display = 'none';
+            document.getElementById('receipt-view').style.display = 'block';
+
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            const receiptNo = 'FF-' + String(Math.floor(Math.random() * 9000) + 1000);
+
+            const startDate = membership.start_date ? new Date(membership.start_date) : today;
+            const endDate = membership.end_date ? new Date(membership.end_date) : new Date(today.setDate(today.getDate() + loadedPlan.duration_days));
+
+            document.getElementById('r-no').textContent = receiptNo;
+            document.getElementById('r-date').textContent = dateStr;
+            document.getElementById('r-name').textContent = `${loadedMember.first_name} ${loadedMember.last_name}`;
+            document.getElementById('r-amount').textContent = `₹${loadedPlan.price.toLocaleString('en-IN')}`;
+            document.getElementById('r-words').textContent = numberToWords(loadedPlan.price) + ' Only';
+            document.getElementById('r-method').textContent = method;
+            document.getElementById('r-plan').textContent = loadedPlan.name;
+            document.getElementById('r-from').textContent = startDate.toLocaleDateString('en-IN');
+            document.getElementById('r-to').textContent = endDate.toLocaleDateString('en-IN');
+        }
+
+        function numberToWords(num) {
+            const a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+            const b = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+            if (num === 0) return 'Zero';
+            if (num < 0) return 'Minus ' + numberToWords(-num);
+            let words = '';
+            if (Math.floor(num / 1000) > 0) { words += numberToWords(Math.floor(num / 1000)) + ' Thousand '; num %= 1000; }
+            if (Math.floor(num / 100) > 0) { words += a[Math.floor(num / 100)] + ' Hundred '; num %= 100; }
+            if (num > 0) {
+                if (num < 20) words += a[num];
+                else words += b[Math.floor(num / 10)] + (num % 10 ? ' ' + a[num % 10] : '');
+            }
+            return words.trim();
+        }
+
+        function downloadReceipt() {
+            window.print();
+        }
+
+        function showLoadError(msg) {
+            document.getElementById('loading-summary').innerHTML = `<p style="color:#ef4444;text-align:center;">${msg}</p>`;
+        }
+
         loadDetails();
     </script>
 </body>
