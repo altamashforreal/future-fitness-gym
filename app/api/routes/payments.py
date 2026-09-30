@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 import razorpay
 import hmac
@@ -80,6 +80,8 @@ def verify_razorpay_payment(body: dict, background_tasks: BackgroundTasks, db: S
     Verify Razorpay payment signature and record the membership.
     Body: { "razorpay_order_id", "razorpay_payment_id", "razorpay_signature", "member_id", "plan_id" }
     """
+    # Read fresh from env each request (critical on Render where env vars may be injected after startup)
+    key_secret = os.environ.get("RAZORPAY_KEY_SECRET", RAZORPAY_KEY_SECRET)
     order_id = body.get("razorpay_order_id")
     payment_id = body.get("razorpay_payment_id")
     signature = body.get("razorpay_signature")
@@ -92,7 +94,7 @@ def verify_razorpay_payment(body: dict, background_tasks: BackgroundTasks, db: S
     # Verify signature using HMAC-SHA256
     msg = f"{order_id}|{payment_id}"
     expected_sig = hmac.new(
-        RAZORPAY_KEY_SECRET.encode("utf-8"),
+        key_secret.encode("utf-8"),
         msg.encode("utf-8"),
         hashlib.sha256
     ).hexdigest()

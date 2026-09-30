@@ -301,15 +301,23 @@
                     })
                 });
 
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || "Verification failed.");
+                let data;
+                try { data = await res.json(); } catch(e) { data = {}; }
+
+                if (!res.ok) {
+                    const detail = typeof data.detail === 'string'
+                        ? data.detail
+                        : (Array.isArray(data.detail) ? data.detail.map(d => d.msg).join(', ') : JSON.stringify(data));
+                    throw new Error(detail || `Server error (${res.status})`);
+                }
 
                 showReceipt(data, response.razorpay_payment_id);
             } catch(err) {
                 document.getElementById('pay-btn').disabled = false;
-                document.getElementById('btn-text').style.display = 'block';
+                document.getElementById('btn-text').style.display = 'flex';
                 document.getElementById('btn-loader').style.display = 'none';
-                showError("Payment verification failed: " + err.message);
+                const msg = (err && err.message) ? err.message : JSON.stringify(err);
+                showError("Payment verification failed: " + msg);
             }
         }
 
