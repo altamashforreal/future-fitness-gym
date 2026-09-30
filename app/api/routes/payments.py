@@ -75,7 +75,7 @@ def create_razorpay_order(body: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/verify")
-def verify_razorpay_payment(body: dict, db: Session = Depends(get_db)):
+def verify_razorpay_payment(body: dict, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Verify Razorpay payment signature and record the membership.
     Body: { "razorpay_order_id", "razorpay_payment_id", "razorpay_signature", "member_id", "plan_id" }
@@ -134,19 +134,16 @@ def verify_razorpay_payment(body: dict, db: Session = Depends(get_db)):
     if member:
         # Send WhatsApp & Email Receipt in background
         from app.services.alert_service import send_payment_receipt
-        try:
-            send_payment_receipt(
-                member=member,
-                amount=plan.price,
-                plan_name=plan.name,
-                method="razorpay",
-                start_date=start,
-                end_date=end,
-                tx_id=payment_id
-            )
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"Failed to send Razorpay receipt: {e}")
+        background_tasks.add_task(
+            send_payment_receipt,
+            member=member,
+            amount=plan.price,
+            plan_name=plan.name,
+            method="razorpay",
+            start_date=start,
+            end_date=end,
+            tx_id=payment_id
+        )
 
 
     return {
