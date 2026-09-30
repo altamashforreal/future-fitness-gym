@@ -551,33 +551,42 @@ function setupRenewModal() {
     document.getElementById('cancel-renew-btn')?.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-    // WhatsApp Link Generation
-    document.getElementById('send-wa-link-btn')?.addEventListener('click', () => {
+    // WhatsApp Link Generation — sends directly via Twilio (no WhatsApp Web)
+    document.getElementById('send-wa-link-btn')?.addEventListener('click', async () => {
         const planId = document.getElementById('renew_plan_id').value;
         if (!planId) {
             showRenewError("Please select a plan first to send a payment link.");
             return;
         }
         if (!currentRenewMember) return;
-        
+
+        const btn = document.getElementById('send-wa-link-btn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Sending...';
+
         const host = window.location.origin;
-        // The URL to the new payment gateway page
         const payUrl = `${host}/frontend/pay.html?member_id=${currentRenewMember.id}&plan_id=${planId}`;
-        
-        let msg = `Hi ${currentRenewMember.first_name}, your membership at Future Fitness Gym `;
-        msg += currentRenewMember.membership_status === 'expired' ? 'has expired.' : 'is expiring soon.';
-        msg += `\n\nPlease click the secure link below to pay online and renew your membership instantly:\n\n${payUrl}\n\nThank you!`;
-        
-        // Use India country code (+91) as default for dummy data, can be changed
-        let phone = currentRenewMember.phone;
-        if (!phone.startsWith('91') && !phone.startsWith('+91')) {
-            phone = '91' + phone; 
+
+        try {
+            const res = await fetch(`${API_BASE}/members/${currentRenewMember.id}/send-payment-link`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plan_id: parseInt(planId), pay_url: payUrl })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Failed to send');
+            }
+
+            showRenewSuccess("✅ Payment link sent to " + currentRenewMember.first_name + "'s WhatsApp!");
+        } catch (err) {
+            showRenewError("❌ Could not send WhatsApp: " + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
-        
-        const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-        window.open(waLink, '_blank');
-        
-        showRenewSuccess("WhatsApp opened with the payment link! 🚀");
     });
 
     form.addEventListener('submit', async e => {

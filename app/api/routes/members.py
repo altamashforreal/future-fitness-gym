@@ -121,3 +121,48 @@ def delete_member(member_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Member not found.")
     db.delete(member)
     db.commit()
+
+
+@router.post("/{member_id}/send-payment-link")
+def send_payment_link(member_id: int, body: dict, db: Session = Depends(get_db)):
+    """
+    Send a WhatsApp payment link directly to the member via Twilio.
+    Body: { "plan_id": int, "pay_url": str }
+    """
+    member = db.query(Member).filter(Member.id == member_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found.")
+
+    plan_id = body.get("plan_id")
+    pay_url = body.get("pay_url")
+
+    if not plan_id or not pay_url:
+        raise HTTPException(status_code=400, detail="plan_id and pay_url are required.")
+
+    if not member.phone:
+        raise HTTPException(status_code=400, detail="Member has no phone number registered.")
+
+    from app.services.alert_service import twilio_client, TWILIO_WHATSAPP_NUMBER
+
+    # Format the message
+    status_word = "has expired" if member.phone else "is expiring soon"
+    msg = (
+        f"Hi {member.first_name}, your membership at Future Fitness Gym {status_word}.\n\n"
+        f"Please click the secure link below to pay online and renew your membership instantly:\n\n"
+        f"{pay_url}\n\n"
+        f"Thank you! 💪\n— Future Fitness Gym"
+    )
+
+    if twilio_client and TWILIO_WHATSAPP_NUMBER:
+        try:
+            phone = member.phone if member.phone.startswith('+') else f"+91{member.phone}"
+            message = twilio_client.messages.create(
+                from_=TWILIO_WHATSAPP_NUMBER,
+                body=msg,
+                to=f"whatsapp:{phone}"
+            )
+            return {"status": "sent", "to": phone, "sid": message.sid}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Twilio error: {str(e)}")
+    else:
+        raise HTTPException(status_code=503, detail="WhatsApp service not configured on server.")
