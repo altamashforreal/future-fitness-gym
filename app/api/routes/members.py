@@ -144,14 +144,9 @@ def send_payment_link(member_id: int, body: dict, db: Session = Depends(get_db))
 
     from app.services.alert_service import twilio_client, TWILIO_WHATSAPP_NUMBER
 
-    # Format the message
-    status_word = "has expired" if member.phone else "is expiring soon"
-    msg = (
-        f"Hi {member.first_name}, your membership at Future Fitness Gym {status_word}.\n\n"
-        f"Please click the secure link below to pay online and renew your membership instantly:\n\n"
-        f"{pay_url}\n\n"
-        f"Thank you! 💪\n— Future Fitness Gym"
-    )
+    # Twilio Sandbox strictly requires matching a pre-approved template for outbound messages.
+    # The default sandbox template is: "Your {{1}} code is {{2}}"
+    msg = f"Your Future Fitness Payment code is {pay_url}"
 
     if twilio_client and TWILIO_WHATSAPP_NUMBER:
         try:
