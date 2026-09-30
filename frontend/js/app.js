@@ -70,7 +70,7 @@ async function checkBackendHealth() {
     const statEl = document.getElementById('stat-api-status');
     const statSub = document.getElementById('stat-api-sub');
     try {
-        const res = await fetch('http://127.0.0.1:8000/health');
+        const res = await fetch('/health');
         if (res.ok) {
             dot.className = 'status-dot online';
             text.textContent = 'Backend Online';

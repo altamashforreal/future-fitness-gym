@@ -34,9 +34,9 @@ class Member(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # relationships
-    memberships = relationship("Membership", back_populates="member", order_by="desc(Membership.start_date)")
-    check_ins = relationship("CheckIn", back_populates="member")
-    payments = relationship("Payment", back_populates="member")
+    memberships = relationship("Membership", back_populates="member", order_by="desc(Membership.start_date)", cascade="all, delete-orphan")
+    check_ins = relationship("CheckIn", back_populates="member", cascade="all, delete-orphan")
+    payments = relationship("Payment", back_populates="member", cascade="all, delete-orphan")
 
     @property
     def full_name(self) -> str:
